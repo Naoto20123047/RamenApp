@@ -29,7 +29,7 @@ fun ShopListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🍜 ラーメン店一覧") },
+                title = { Text("ラーメン店一覧") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
