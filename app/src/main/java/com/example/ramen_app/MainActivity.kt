@@ -12,6 +12,8 @@ import com.example.ramen_app.ui.theme.HomeScreen.homeScreen
 import com.example.ramen_app.ui.theme.Ramen_AppTheme
 import com.example.ramen_app.ui.theme.ShopDetailScreen.navigateToShopDetail
 import com.example.ramen_app.ui.theme.ShopDetailScreen.shopDetailScreen
+import com.example.ramen_app.ui.theme.ShopListScreen.favoriteScreen
+import com.example.ramen_app.ui.theme.ShopListScreen.navigateToFavorites
 import com.example.ramen_app.ui.theme.ShopListScreen.navigateToShopList
 import com.example.ramen_app.ui.theme.ShopListScreen.shopListScreen
 
@@ -26,6 +28,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun RamenAppNavigation() {
     val navController = rememberNavController()
@@ -39,9 +42,14 @@ fun RamenAppNavigation() {
         )
         shopListScreen(
             onShopClick = { shopId -> navController.navigateToShopDetail(shopId) },
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onNavigateToFavorites = { navController.navigateToFavorites() }
         )
         shopDetailScreen(
+            onBack = { navController.popBackStack() }
+        )
+        favoriteScreen(
+            onShopClick = { navController.navigateToShopDetail(it) },
             onBack = { navController.popBackStack() }
         )
     }

@@ -8,12 +8,14 @@ const val SHOP_LIST_ROUTE = "list"
 
 fun NavGraphBuilder.shopListScreen(
     onShopClick: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToFavorites: () -> Unit
 ) {
     composable(SHOP_LIST_ROUTE) {
         ShopListScreen(
             onShopClick = onShopClick,
-            onBack = onBack
+            onBack = onBack,
+            onNavigateToFavorites = onNavigateToFavorites
         )
     }
 }
