@@ -2,39 +2,26 @@ package com.example.ramen_app.ui.theme.ShopDetailScreen
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -46,6 +33,7 @@ fun ShopDetailScreen(
     vm: ShopDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val memoRepository = remember { MemoRepository(context) }
 
     Scaffold(
         topBar = {
@@ -86,6 +74,13 @@ fun ShopDetailScreen(
 
                 vm.shop != null -> {
                     val shop = vm.shop!!
+                    var memo by remember {
+                        mutableStateOf(memoRepository.getMemo(shop.id))
+                    }
+                    var rating by remember {
+                        mutableIntStateOf(memoRepository.getRating(shop.id))
+                    }
+                    var isEditing by remember { mutableStateOf(false) }
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 24.dp)
@@ -163,7 +158,120 @@ fun ShopDetailScreen(
                                 )
                             }
                         }
+                        item {
+                            HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+                            MemoSection(
+                                shopId = shop.id,
+                                memo = memo,
+                                rating = rating,
+                                isEditing = isEditing,
+                                onMemoChange = { memo = it },
+                                onRatingChange = { rating = it },
+                                onEditClick = { isEditing = true },
+                                onSaveClick = {
+                                    memoRepository.saveMemo(shop.id, memo)
+                                    memoRepository.saveRating(shop.id, rating)
+                                    isEditing = false
+                                }
+                            )
+                        }
                     }
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun MemoSection(
+    shopId: String,
+    memo: String,
+    rating: Int,
+    isEditing: Boolean,
+    onMemoChange: (String) -> Unit,
+    onRatingChange: (Int) -> Unit,
+    onEditClick: () -> Unit,
+    onSaveClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "ユーザーメモ",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "評価",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+            repeat(5) { index ->
+                val filled = index < rating
+                IconButton(
+                    onClick = {
+                        if (isEditing) onRatingChange(index + 1)
+                        else onEditClick()
+                    },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = if (filled) Icons.Filled.Star else Icons.Filled.StarBorder,
+                        contentDescription = "${index + 1}点",
+                        tint = if (filled) Color(0xFFFFC107) else MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+        }
+        if (isEditing) {
+            OutlinedTextField(
+                value = memo,
+                onValueChange = onMemoChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("このお店のメモを入力...") },
+                minLines = 3,
+                maxLines = 6,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+            Button(
+                onClick = onSaveClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("保存する")
+            }
+        } else {
+            if (memo.isBlank()) {
+                OutlinedButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("メモを追加する")
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = memo,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                TextButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("編集する")
                 }
             }
         }
