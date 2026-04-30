@@ -42,7 +42,7 @@ fun RamenAppNavigation() {
         )
         shopListScreen(
             onShopClick = { shopId -> navController.navigateToShopDetail(shopId) },
-            onBack = { navController.popBackStack() },
+            onBack = { if (navController.previousBackStackEntry != null) navController.popBackStack() },
             onNavigateToFavorites = { navController.navigateToFavorites() }
         )
         shopDetailScreen(
