@@ -1,5 +1,7 @@
 package com.example.ramen_app.ui.theme.ShopDetailScreen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +15,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -29,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,6 +45,8 @@ fun ShopDetailScreen(
     onBack: () -> Unit,
     vm: ShopDetailViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,9 +67,15 @@ fun ShopDetailScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentAlignment = Alignment.Center
+        ) {
             when {
                 vm.isLoading -> CircularProgressIndicator()
+
                 vm.errorMessage != null -> Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -70,23 +83,58 @@ fun ShopDetailScreen(
                     Text(vm.errorMessage!!, color = MaterialTheme.colorScheme.error)
                     Button(onClick = { vm.fetchShop() }) { Text("再試行") }
                 }
+
                 vm.shop != null -> {
                     val shop = vm.shop!!
-                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
                         shop.thumbnailUrl?.let { url ->
                             item {
                                 AsyncImage(
                                     model = url,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxWidth().height(260.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(260.dp)
                                 )
                             }
                         }
                         item {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = shop.name ?: shop.id, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                                Text(text = "ID: ${shop.id}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                                Text(
+                                    text = shop.name ?: shop.id,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "ID: ${shop.id}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                                Button(
+                                    onClick = {
+                                        val query = Uri.encode(shop.name ?: shop.id)
+                                        val uri = Uri.parse("geo:0,0?q=$query")
+                                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Place,
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    )
+                                    Text("Google Maps で経路案内")
+                                }
                             }
                             HorizontalDivider()
                         }
@@ -97,7 +145,9 @@ fun ShopDetailScreen(
                                     text = "写真（${shop.photos?.size ?: 0}枚）",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                                    modifier = Modifier.padding(
+                                        start = 16.dp, top = 16.dp, bottom = 8.dp
+                                    )
                                 )
                             }
                             items(extraPhotos) { photo ->
@@ -105,7 +155,11 @@ fun ShopDetailScreen(
                                     model = photo.url,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxWidth().height(220.dp).padding(horizontal = 16.dp, vertical = 4.dp).clip(RoundedCornerShape(8.dp))
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(220.dp)
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .clip(RoundedCornerShape(8.dp))
                                 )
                             }
                         }
