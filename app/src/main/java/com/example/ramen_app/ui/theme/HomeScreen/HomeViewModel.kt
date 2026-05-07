@@ -24,8 +24,8 @@ class HomeViewModel : ViewModel() {
             isLoading = true
             errorMessage = null
             try {
-                val result = ramenApiService.getShops(page = 1, perPage = 5).shops
-                featuredShops = result
+                val result = ramenApiService.getShops(page = 1, perPage = 50).shops
+                featuredShops = result.shuffled().take(5)
             } catch (e: Exception) {
                 errorMessage = "読み込みに失敗しました"
             } finally {
