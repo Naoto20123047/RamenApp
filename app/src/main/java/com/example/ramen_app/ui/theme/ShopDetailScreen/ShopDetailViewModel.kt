@@ -15,20 +15,15 @@ class ShopDetailViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val shopId: String? = savedStateHandle["shopId"]
-
     var shop by mutableStateOf<Shop?>(null)
         private set
-
     var isLoading by mutableStateOf(false)
         private set
-
     var errorMessage by mutableStateOf<String?>(null)
         private set
-
     init {
         shopId?.let { fetchShop(it) }
     }
-
     fun fetchShop(id: String = shopId ?: "") {
         if (id.isEmpty()) return
         viewModelScope.launch {

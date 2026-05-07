@@ -46,11 +46,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.lifecycle.viewmodel.compose)  // 追加
-    implementation(libs.retrofit)                     // 追加
-    implementation(libs.retrofit.gson)                // 追加
-    implementation(libs.coil.compose)                 // 追加
-    implementation(libs.navigation.compose)           // 追加
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.coil.compose)
+    implementation(libs.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
